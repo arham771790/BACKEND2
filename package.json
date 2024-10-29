@@ -1,0 +1,11 @@
+{
+  "name": "chaibackend",
+  "version": "1.0.0",
+  "description": "a detailed video on backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}
