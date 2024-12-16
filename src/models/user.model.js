@@ -35,7 +35,7 @@ const userSchema=new Schema({
     },
     watchHistory:
     [{
-        type:Schemas.Types.ObjectId,
+        type:Schema.Types.ObjectId,
         ref:'Video',
     }], // Its a list of videos objects that total no of videos watched by user each having a reference to the url of video
     password:{
@@ -51,7 +51,7 @@ userSchema.pre("save",async function (next)
 {
     if(!this.isModified("password")) return next();
     this.password=bcrypt.hash(this.password,10);
-    next();
+  next();
 
 })// We cannot use arrow function here because arrow functions don't tell the reference so we have to use a normal function in callback function instead of arrow function
 
@@ -69,15 +69,8 @@ userSchema.methods.generateAccessToken=async function ()
 process.env.ACCESS_TOKEN_SECRET,{expiresIn:process.env.ACCESS_TOKEN_EXPIRY})
     //generates access token
 }
-return  jwt.sign({
-        _id:this._id,
-        email:this.email,
-        username:this.username,
-        fullName:this.fullname
-    },
-process.env.ACCESS_TOKEN_SECRET,{expiresIn:process.env.ACCESS_TOKEN_EXPIRY})
     //generates access token
-userSchema.methods.refreshToken = function (){
+userSchema.methods.generateRefreshToken = async function (){
     return jwt.sign({
         _id:this._id,
         email:this.email,
