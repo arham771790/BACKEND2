@@ -19,9 +19,9 @@ app.use(cookieParser());
 // routes import //we observe that we are importing in the last ,importing routes is done like this only in production mode projects
 
 //routes declarations
+
 import userRouter from "./routes/user.routes.js"
-app.use("/a/v1/abc",userRouter);
-app.use("/api/v1/users",userRouter);
+app.use('/api/v1/users',userRouter);
 //http://localhost:8000/api/v1/users this type of route /url is created
 export {app}
 
