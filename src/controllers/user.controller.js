@@ -19,7 +19,7 @@ const registerUser=(async (req,res)=>{
     //return responses
 
     const {fullName,email,username,password} =req.body;
-    console.log("Email:",email)
+  
      if(fullName==="")
      {
         throw new ApiError(400,"Full Name is required")
@@ -28,6 +28,8 @@ const registerUser=(async (req,res)=>{
      {
         throw new ApiError(400,"All field required")
      }
+     console.log(req.body);
+     console.log(req.files);
      const existedUser= await User.findOne({
         $or:[{username},{fullName}]
      })
@@ -35,12 +37,24 @@ const registerUser=(async (req,res)=>{
      {
         throw new ApiError(409,"Username or Email Address already exists");
      }
-     const avatarLocalPath=req.files?.avatar[0]?.path;
-     const coverImageLocalPath=req.files?.coverImage[0]?.path;
+     const avatarLocalPath=req.files?.avatar[0]?.path || null;
+
+    //  const coverImageLocalPath = req.files?.coverImage?.[0]?.path || null;
+     let coverImageLocalPath;
+     if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length >0)
+     {
+        coverImageLocalPath=req.files.coverImage[0].path
+     }
+
+if (!coverImageLocalPath) {
+    console.error("Cover image file not provided or invalid.");
+    // Add appropriate error handling here, e.g., returning an error response.
+}
 
      if(!avatarLocalPath)
-        throw new ApiError(400,"Avatar file is required")
+        {throw new ApiError(400,"Avatar file is required")}
     const avatar= await uploadonCloudinary(avatarLocalPath);
+
     const coverImage=await uploadonCloudinary(coverImageLocalPath);
     if(!avatar)
     {

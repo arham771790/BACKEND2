@@ -21,6 +21,7 @@ app.use(cookieParser());
 //routes declarations
 import userRouter from "./routes/user.routes.js"
 app.use("/api/v1/users",userRouter);
+app.get("/api/v1/users",userRouter);
 //http://localhost:8000/api/v1/users this type of route /url is created
 export {app}
 

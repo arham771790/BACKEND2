@@ -21,7 +21,7 @@ const userSchema=new Schema({
     },
     fullname:{
         type:String,
-        required:true,
+         
         trim:true,
         index:true, //Used for faster lookup of schema
     },
