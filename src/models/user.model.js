@@ -47,16 +47,15 @@ const userSchema=new Schema({
     },
 },{timestamps:true});
 // Pre hooks or middlewares are functions that run before certain actions or events on a model, such as saving data to a database, updating, or deleting a record. Pre middleware is useful for performing tasks like validation, data transformation, logging, or authentication checks before the main action completes.
-userSchema.pre("save",async function (next)
-{
+userSchema.pre("save", async function (next) {
     if(!this.isModified("password")) return next();
-    this.password=bcrypt.hash(this.password,10);
-  next();
 
-})// We cannot use arrow function here because arrow functions don't tell the reference so we have to use a normal function in callback function instead of arrow function
+    this.password = await bcrypt.hash(this.password, 10)
+    next()
+})
 
-userSchema.methods.isPasswordCorrect= async function(password){
-   return await  bcrypt.compare(password,this.password); //*encrypted password which we have encrypted it using bcrypt hash
+userSchema.methods.isPasswordCorrect = async function(enteredpassword){
+    return await bcrypt.compare(enteredpassword, this.password)
 }
 userSchema.methods.generateAccessToken=async function ()
 {

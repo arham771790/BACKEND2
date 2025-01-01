@@ -113,7 +113,8 @@ const loginUser=asyncHandler(async (req,res)=>{
     //Send cookie
     //Then send a response for successful login
     const {email,username,password}=req.body;
-    if(!username || !email)
+    console.log(email,username,password);
+    if(!username  && !email)
         {
             throw new ApiError(400,"Username or email is required")
         } 
@@ -125,13 +126,15 @@ const loginUser=asyncHandler(async (req,res)=>{
     {
         throw new ApiError(400,"User does not exists");
     }
-    const isPasswordValid= await user.isPasswordCorrect(password);
-    if(!isPasswordValid)
+    const isPasswordValid=await   async function (enteredpassword) {
+        return await bcrypt.compare(enteredpassword, this.password);
+    };
+    console.log(isPasswordValid);
+    if(isPasswordValid)
     {
-        throw new ApiError(401,"Incorrect Password");
-    }
     const{accessToken,refreshToken}=await generateAccessAndRefreshToken(user._id); 
     const loggedInUser=await User.findById(user._id).select("-password -refreshToken") //Excluding password and refresh token 
+    console.log("Logged IN:",loggedInUser);
     const options=
     {
         httpOnly:true,
@@ -145,29 +148,38 @@ const loginUser=asyncHandler(async (req,res)=>{
             user:loggedInUser,accessToken,refreshToken
         },"User logged in Successfully!!" )
     )
-
-
-})
-const logoutUser=asyncHandler(async (req,res)=>{
-    //Remove the cookies
-    //Reset access and refresh Token
-    await User.findByIdAndUpdate(
-        req.user._id,
-        {
-            $set:{
-                refreshToken:undefined
-            }
-        }
-    )
-    const options={
-        httpOnly:true,
-        secure:true
     }
-    return res
-    .status(200)
-    .clearCookie("accessToken",options)
-    .clearCookie("refreshToken",options)
-    .json(new ApiResponse(200,{},"User logged out successfully"))
+    else
+    {
+        throw new ApiError(401,"Incorrect Password!!");
+    }
+    
+
 
 })
+const logoutUser = asyncHandler(async (req, res) => {
+    try {
+        // Remove refreshToken from the user's record
+        await User.findByIdAndUpdate(req.user._id, {
+            $set: { refreshToken: undefined },
+        });
+
+        // Options for clearing cookies
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production", // Use secure cookies in production
+            sameSite: "strict", // Prevent CSRF attacks
+        };
+
+        // Clear cookies and send response
+        return res
+            .status(200)
+            .clearCookie("accessToken", cookieOptions)
+            .clearCookie("refreshToken", cookieOptions)
+            .json(new ApiResponse(200, {}, "User logged out successfully"));
+    } catch (error) {
+        console.error("Error during logout:", error);
+        return res.status(500).json(new ApiResponse(500, {}, "Logout failed"));
+    }
+});
 export  {registerUser,loginUser,logoutUser}
